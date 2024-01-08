@@ -63,7 +63,7 @@ class UserTest extends TestCase
         ]);
     }
 
-    public function testUserLoginSuccess(): void
+    public function testUserLoginSuccess()
     {
         $this->testUserRegisterSuccess();
 
@@ -79,6 +79,8 @@ class UserTest extends TestCase
 
         $user = \App\Models\User::where('username', 'khalilannbiya')->first();
         self::assertNotNull($user->token);
+
+        return $user->token;
     }
 
     public function testUserLoginUsernameWrong(): void
@@ -108,6 +110,46 @@ class UserTest extends TestCase
             "errors" => [
                 "message" => [
                     "username or password wrong."
+                ]
+            ]
+        ]);
+    }
+
+    public function testGetUserCurrentSuccess(): void
+    {
+        $token = $this->testUserLoginSuccess();
+
+        $this->get('/api/users/current', [
+            "Authorization" => $token,
+        ])->assertStatus(200)->assertJson([
+            "data" => [
+                "username" => "khalilannbiya",
+                "name" => "Syeich Khalil Annbiya",
+                "token" => $token
+            ]
+        ]);
+    }
+
+    public function testGetUserCurrentWithoutTokenHeader()
+    {
+        $this->get('/api/users/current')->assertStatus(401)->assertJson([
+            "errors" => [
+                "message" => [
+                    "unauthorized"
+                ]
+            ]
+        ]);
+    }
+
+    public function testGetUserCurrentTokenInvalid()
+    {
+
+        $this->get('/api/users/current', [
+            "Authorization" => "invalidtoken123",
+        ])->assertStatus(401)->assertJson([
+            "errors" => [
+                "message" => [
+                    "unauthorized"
                 ]
             ]
         ]);

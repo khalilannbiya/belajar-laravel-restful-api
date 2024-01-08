@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use App\Http\Resources\UserResource;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\UserLoginRequest;
 use App\Http\Requests\UserRegisterRequest;
@@ -52,6 +54,12 @@ class UserController extends Controller
         $user->token = Str::uuid()->toString();
         $user->save();
 
+        return new UserResource($user);
+    }
+
+    public function get()
+    {
+        $user = Auth::user();
         return new UserResource($user);
     }
 }
