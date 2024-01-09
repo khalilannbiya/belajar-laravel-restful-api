@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\UserLoginRequest;
 use App\Http\Requests\UserRegisterRequest;
+use App\Http\Requests\UserUpdateRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class UserController extends Controller
@@ -60,6 +61,26 @@ class UserController extends Controller
     public function get()
     {
         $user = Auth::user();
+        return new UserResource($user);
+    }
+
+    public function update(UserUpdateRequest $request)
+    {
+        $data = $request->all();
+
+        $user = Auth::user();
+
+        if (isset($data["name"])) {
+            $user->name = $data["name"];
+        }
+
+        if (isset($data["password"])) {
+            $user->password = Hash::make($data["password"]);
+        }
+
+        // If there is a warning error for the save() method, please ignore it as it may be due to a VSCode extension issue, specifically Intelephense
+        $user->save();
+
         return new UserResource($user);
     }
 }

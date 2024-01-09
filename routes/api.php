@@ -24,5 +24,6 @@ Route::prefix('users')->name('users.')->group(function () {
 
     Route::middleware(['api.auth'])->group(function () {
         Route::get('current', [\App\Http\Controllers\UserController::class, 'get'])->name("get");
+        Route::put('current', [\App\Http\Controllers\UserController::class, 'update'])->name("update");
     });
 });
