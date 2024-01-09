@@ -214,4 +214,28 @@ class UserTest extends TestCase
             ]
         ]);
     }
+
+    public function testLogoutSuccess()
+    {
+        $token =  $this->testUserLoginSuccess();
+
+        $this->delete('/api/users/logout', [], [
+            "Authorization" => $token,
+        ])->assertStatus(200)->assertJson([
+            "data" => true
+        ]);
+    }
+
+    public function testLogoutFailed()
+    {
+        $this->delete('/api/users/logout', [], [
+            "Authorization" => "salah",
+        ])->assertStatus(401)->assertJson([
+            "errors" => [
+                "message" => [
+                    "unauthorized"
+                ]
+            ]
+        ]);
+    }
 }

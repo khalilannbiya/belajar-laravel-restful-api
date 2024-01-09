@@ -83,4 +83,17 @@ class UserController extends Controller
 
         return new UserResource($user);
     }
+
+    public function logout()
+    {
+        $user = Auth::user();
+        $user->token = null;
+
+        // If there is a warning error for the save() method, please ignore it as it may be due to a VSCode extension issue, specifically Intelephense
+        $user->save();
+
+        return response()->json([
+            "data" => true
+        ]);
+    }
 }
