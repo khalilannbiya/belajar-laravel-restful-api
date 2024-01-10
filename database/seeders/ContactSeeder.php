@@ -12,6 +12,13 @@ class ContactSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        $user = \App\Models\User::where('username', 'andikaa')->first();
+        \App\Models\Contact::create([
+            'first_name' => 'test',
+            'last_name' => 'test',
+            'email' => 'test@gmail.com',
+            'phone' => '111111',
+            'user_id' => $user->id
+        ]);
     }
 }

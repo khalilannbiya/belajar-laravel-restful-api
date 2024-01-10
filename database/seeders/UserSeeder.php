@@ -18,5 +18,12 @@ class UserSeeder extends Seeder
         $user->password = \Illuminate\Support\Facades\Hash::make("inipassword123##");
         $user->token = "testingtoken";
         $user->save();
+
+        $user = new \App\Models\User();
+        $user->username = "prakasaaa";
+        $user->name = "Prakasa";
+        $user->password = \Illuminate\Support\Facades\Hash::make("inipassword123##");
+        $user->token = "testingtoken2";
+        $user->save();
     }
 }
