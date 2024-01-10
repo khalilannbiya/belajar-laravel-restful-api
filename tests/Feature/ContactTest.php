@@ -127,4 +127,100 @@ class ContactTest extends TestCase
                 ]
             ]);
     }
+
+    public function testUpdateContactSuccess()
+    {
+        $this->seed(["UserSeeder", "ContactSeeder"]);
+        $contact = Contact::query()->limit(1)->first();
+
+        $this->put('/api/contacts/' . $contact->id, [
+            'first_name' => 'testubah',
+            'last_name' => 'testubah',
+            'email' => 'testubah@gmail.com',
+            'phone' => '1111112',
+        ], [
+            'Authorization' => 'testingtoken'
+        ])->assertStatus(200)->assertJson([
+            "data" => [
+                "first_name" => "testubah",
+                "last_name" => "testubah",
+                "email" => "testubah@gmail.com",
+                "phone" => "1111112",
+            ]
+        ]);
+
+        $contactNew = Contact::where('first_name', 'testubah')->first();
+        self::assertNotEquals($contact->first_name, $contactNew->first_name);
+        self::assertNotEquals($contact->last_name, $contactNew->last_name);
+        self::assertNotEquals($contact->email, $contactNew->email);
+        self::assertNotEquals($contact->phone, $contactNew->phone);
+    }
+
+    public function testUpdateContactFirstNameOnly()
+    {
+        $this->seed(["UserSeeder", "ContactSeeder"]);
+        $contact = Contact::query()->limit(1)->first();
+
+        $this->put('/api/contacts/' . $contact->id, [
+            'first_name' => 'testubah',
+        ], [
+            'Authorization' => 'testingtoken'
+        ])->assertStatus(200)->assertJson([
+            "data" => [
+                "first_name" => "testubah",
+                "last_name" => "test",
+                "email" => "test@gmail.com",
+                "phone" => "111111",
+            ]
+        ]);
+
+        $contactNew = Contact::where('first_name', 'testubah')->first();
+        self::assertNotEquals($contact->first_name, $contactNew->first_name);
+        self::assertEquals($contact->last_name, $contactNew->last_name);
+        self::assertEquals($contact->email, $contactNew->email);
+        self::assertEquals($contact->phone, $contactNew->phone);
+    }
+
+    public function testUpdateOtherUserContact()
+    {
+        $this->seed(["UserSeeder", "ContactSeeder"]);
+        $contact = Contact::query()->limit(1)->first();
+
+        $this->put('/api/contacts/' . $contact->id, [
+            'first_name' => 'testubah',
+            'last_name' => 'testubah',
+            'email' => 'testubah@gmail.com',
+            'phone' => '1111112',
+        ], [
+            'Authorization' => 'testingtoken2'
+        ])->assertStatus(404)
+            ->assertJson([
+                'errors' => [
+                    'message' => [
+                        'not found'
+                    ]
+                ]
+            ]);
+    }
+
+    public function testUpdateContactNotFound()
+    {
+        $this->seed(["UserSeeder", "ContactSeeder"]);
+        $contact = Contact::query()->limit(1)->first();
+
+        $this->put('/api/contacts/' . $contact->id + 1, [
+            'first_name' => 'testubah',
+            'last_name' => 'testubah',
+            'email' => 'testubah@gmail.com',
+            'phone' => '1111112',
+        ], [
+            'Authorization' => 'testingtoken'
+        ])->assertStatus(404)->assertJson([
+            "errors" => [
+                "message" => [
+                    "not found"
+                ]
+            ]
+        ]);
+    }
 }

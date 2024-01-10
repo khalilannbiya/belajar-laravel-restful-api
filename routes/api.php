@@ -32,5 +32,6 @@ Route::prefix('contacts')->name('contacts.')->group(function () {
     Route::middleware(['api.auth'])->group(function () {
         Route::post('/', [\App\Http\Controllers\ContactController::class, 'create'])->name("create");
         Route::get('/{id}', [\App\Http\Controllers\ContactController::class, 'get'])->name("get")->where('id', '^[0-9]+$');
+        Route::put('/{id}', [\App\Http\Controllers\ContactController::class, 'update'])->name("update")->where('id', '^[0-9]+$');
     });
 });
