@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Contact extends Model
 {
+    protected $fillable = ['first_name', 'last_name', 'email', 'phone'];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, "user_id", "id");

@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,5 +25,11 @@ Route::prefix('users')->name('users.')->group(function () {
         Route::get('current', [\App\Http\Controllers\UserController::class, 'get'])->name("get");
         Route::put('current', [\App\Http\Controllers\UserController::class, 'update'])->name("update");
         Route::delete('logout', [\App\Http\Controllers\UserController::class, 'logout'])->name("logout");
+    });
+});
+
+Route::prefix('contacts')->name('contacts.')->group(function () {
+    Route::middleware(['api.auth'])->group(function () {
+        Route::post('/', [\App\Http\Controllers\ContactController::class, 'create'])->name("create");
     });
 });
