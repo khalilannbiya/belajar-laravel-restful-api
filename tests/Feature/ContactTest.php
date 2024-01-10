@@ -223,4 +223,35 @@ class ContactTest extends TestCase
             ]
         ]);
     }
+
+    public function testDeleteContactSuccess()
+    {
+        $this->seed(["UserSeeder", "ContactSeeder"]);
+        $contact = Contact::query()->limit(1)->first();
+
+        $this->delete('/api/contacts/' . $contact->id, [], [
+            'Authorization' => 'testingtoken'
+        ])->assertStatus(200)->assertJson([
+            "data" => true
+        ]);
+
+        $contactDeleted = Contact::where('id', $contact->id)->first();
+        self::assertNull($contactDeleted);
+    }
+
+    public function testDeleteContactNotFound()
+    {
+        $this->seed(["UserSeeder", "ContactSeeder"]);
+        $contact = Contact::query()->limit(1)->first();
+
+        $this->delete('/api/contacts/' . $contact->id + 1, [], [
+            'Authorization' => 'testingtoken'
+        ])->assertStatus(404)->assertJson([
+            "errors" => [
+                "message" => [
+                    "not found"
+                ]
+            ]
+        ]);
+    }
 }
