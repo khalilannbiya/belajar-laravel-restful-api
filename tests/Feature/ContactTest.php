@@ -86,10 +86,10 @@ class ContactTest extends TestCase
         ])->assertStatus(200)
             ->assertJson([
                 'data' => [
-                    'first_name' => 'test',
-                    'last_name' => 'test',
-                    'email' => 'test@gmail.com',
-                    'phone' => '111111',
+                    "first_name" => "andikaa test first 1",
+                    "last_name" => "andikaa test last 1",
+                    "email" => "test1@gmail.com",
+                    "phone" => "1111111"
                 ]
             ]);
     }
@@ -99,7 +99,7 @@ class ContactTest extends TestCase
         $this->seed(["UserSeeder", "ContactSeeder"]);
         $contact = Contact::query()->limit(1)->first();
 
-        $this->get('/api/contacts/' . ($contact->id + 1), [
+        $this->get('/api/contacts/' . $contact->id + 10, [
             'Authorization' => 'testingtoken'
         ])->assertStatus(404)
             ->assertJson([
@@ -168,9 +168,9 @@ class ContactTest extends TestCase
         ])->assertStatus(200)->assertJson([
             "data" => [
                 "first_name" => "testubah",
-                "last_name" => "test",
-                "email" => "test@gmail.com",
-                "phone" => "111111",
+                "last_name" => "andikaa test last 1",
+                "email" => "test1@gmail.com",
+                "phone" => "1111111"
             ]
         ]);
 
@@ -208,7 +208,7 @@ class ContactTest extends TestCase
         $this->seed(["UserSeeder", "ContactSeeder"]);
         $contact = Contact::query()->limit(1)->first();
 
-        $this->put('/api/contacts/' . $contact->id + 1, [
+        $this->put('/api/contacts/' . $contact->id + 10, [
             'first_name' => 'testubah',
             'last_name' => 'testubah',
             'email' => 'testubah@gmail.com',
@@ -244,7 +244,7 @@ class ContactTest extends TestCase
         $this->seed(["UserSeeder", "ContactSeeder"]);
         $contact = Contact::query()->limit(1)->first();
 
-        $this->delete('/api/contacts/' . $contact->id + 1, [], [
+        $this->delete('/api/contacts/' . $contact->id + 10, [], [
             'Authorization' => 'testingtoken'
         ])->assertStatus(404)->assertJson([
             "errors" => [
