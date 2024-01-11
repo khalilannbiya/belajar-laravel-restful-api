@@ -35,5 +35,7 @@ Route::prefix('contacts')->name('contacts.')->group(function () {
         Route::get('/{id}', [\App\Http\Controllers\ContactController::class, 'get'])->name("get")->where('id', '^[0-9]+$');
         Route::put('/{id}', [\App\Http\Controllers\ContactController::class, 'update'])->name("update")->where('id', '^[0-9]+$');
         Route::delete('/{id}', [\App\Http\Controllers\ContactController::class, 'delete'])->name("delete")->where('id', '^[0-9]+$');
+
+        Route::post('/{id}/addresses', [\App\Http\Controllers\AddressController::class, 'create'])->name("create.addresses")->where('id', '^[0-9]+$');
     });
 });

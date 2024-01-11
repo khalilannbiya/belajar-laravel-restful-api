@@ -12,13 +12,32 @@ class ContactSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = \App\Models\User::where('username', 'andikaa')->first();
-        \App\Models\Contact::create([
-            'first_name' => 'test',
-            'last_name' => 'test',
-            'email' => 'test@gmail.com',
-            'phone' => '111111',
-            'user_id' => $user->id
-        ]);
+        $user1 = \App\Models\User::where('username', 'andikaa')->first();
+        $user2 = \App\Models\User::where('username', 'prakasaaa')->first();
+
+        $andikaContacts = [];
+        for ($i = 1; $i <= 10; $i++) {
+            $andikaContacts[] = [
+                'first_name' => "$user1->username test first $i",
+                'last_name' => "$user1->username test last $i",
+                'email' => "test$i@gmail.com",
+                'phone' => "111111$i",
+                'user_id' => $user1->id
+            ];
+        }
+
+        $prakasaContacts = [];
+        for ($i = 1; $i <= 10; $i++) {
+            $prakasaContacts[] = [
+                'first_name' => "$user2->username test first $i",
+                'last_name' => "$user2->username test last $i",
+                'email' => "test$i@gmail.com",
+                'phone' => "111111$i",
+                'user_id' => $user2->id
+            ];
+        }
+
+        \App\Models\Contact::insert($andikaContacts);
+        \App\Models\Contact::insert($prakasaContacts);
     }
 }
