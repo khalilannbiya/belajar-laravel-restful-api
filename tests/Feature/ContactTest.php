@@ -254,4 +254,17 @@ class ContactTest extends TestCase
             ]
         ]);
     }
+
+    public function testSearchByEmail()
+    {
+        $this->seed(["UserSeeder", "ContactSeeder"]);
+
+        $this->get('/api/contacts?email=test', [
+            'Authorization' => 'testingtoken'
+        ])->assertStatus(200)->assertJson([
+            "data" => [],
+            "links" => [],
+            "meta" => []
+        ]);
+    }
 }
