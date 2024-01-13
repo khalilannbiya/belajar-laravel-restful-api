@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\Address\AddressResource;
 use App\Http\Requests\Address\AddressCreateRequest;
+use App\Http\Requests\Address\AddressUpdateRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class AddressController extends Controller
@@ -61,6 +62,39 @@ class AddressController extends Controller
                 ]
             ])->setStatusCode(404));
         }
+        return new AddressResource($address);
+    }
+
+    public function update(AddressUpdateRequest $request, string $idContact, string $idAddress)
+    {
+        $data = $request->all();
+        $user = Auth::user();
+        $contact = Contact::with('addresses')->where('user_id', $user->id)->where('id', $idContact)->first();
+
+        if (!$contact) {
+            throw new HttpResponseException(response()->json([
+                "errors" => [
+                    "message" => [
+                        "not found"
+                    ]
+                ]
+            ])->setStatusCode(404));
+        }
+
+        $address = $contact->addresses()->where('id', $idAddress)->first();
+        if (!$address) {
+            throw new HttpResponseException(response()->json([
+                "errors" => [
+                    "message" => [
+                        "not found"
+                    ]
+                ]
+            ])->setStatusCode(404));
+        }
+
+        $address->fill($data);
+        $address->save();
+
         return new AddressResource($address);
     }
 }

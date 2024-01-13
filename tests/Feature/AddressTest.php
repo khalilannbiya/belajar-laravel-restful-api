@@ -183,4 +183,77 @@ class AddressTest extends TestCase
             ]
         ]);
     }
+
+    public function testUpdateAddressSuccess()
+    {
+        $this->seed(["UserSeeder", "AddressSeeder"]);
+        $user = User::with('contacts')->where('username', 'andikaa')->first();
+        $contact = $user->contacts->first();
+        $address = $contact->addresses()->first();
+
+        self::assertEquals($address->street, "JL Mawar 1");
+        self::assertEquals($address->city, "Karawang");
+        self::assertEquals($address->province, "Jawa Barat");
+        self::assertEquals($address->country, "Indonesia");
+        self::assertEquals($address->postal_code, "121212");
+
+        $this->put('api/contacts/' . $contact->id . '/addresses/' . $address->id, [
+            "street" => "Jl Rambutan",
+            "city" => "Jakarta",
+            "province" => "DKI Jakarta",
+            "country" => "Indonesia",
+            "postal_code" => "90900"
+        ], [
+            "Authorization" => $user->token
+        ])->assertStatus(200)->assertJson([
+            "data" => [
+                "street" => "Jl Rambutan",
+                "city" => "Jakarta",
+                "province" => "DKI Jakarta",
+                "country" => "Indonesia",
+                "postal_code" => "90900"
+            ]
+        ]);
+
+        $updatedAddress = $contact->addresses()->first();
+        self::assertNotEquals($address->street, $updatedAddress->street);
+        self::assertNotEquals($address->city, $updatedAddress->city);
+        self::assertNotEquals($address->province, $updatedAddress->province);
+        self::assertNotEquals($address->postal_code, $updatedAddress->postal_code);
+    }
+
+    public function testUpdateAddressFailsWithoutRequiredFields()
+    {
+        $this->seed(["UserSeeder", "AddressSeeder"]);
+        $user = User::with('contacts')->where('username', 'andikaa')->first();
+        $contact = $user->contacts->first();
+        $address = $contact->addresses()->first();
+
+        self::assertEquals($address->street, "JL Mawar 1");
+        self::assertEquals($address->city, "Karawang");
+        self::assertEquals($address->province, "Jawa Barat");
+        self::assertEquals($address->country, "Indonesia");
+        self::assertEquals($address->postal_code, "121212");
+
+        $this->put('api/contacts/' . $contact->id . '/addresses/' . $address->id, [
+            "street" => "Jl Rambutan",
+            "city" => "Jakarta",
+            "province" => "DKI Jakarta",
+            "postal_code" => "90900"
+        ], [
+            "Authorization" => $user->token
+        ])->assertStatus(400)->assertJson([
+            "errors" => [
+                "country" => [
+                    "The country field is required."
+                ]
+            ]
+        ]);
+
+        $updatedAddress = $contact->addresses()->first();
+        self::assertEquals($address->street, $updatedAddress->street);
+        self::assertEquals($address->city, $updatedAddress->city);
+        self::assertEquals($address->province, $updatedAddress->province);
+        self::assertEquals($address->postal_code, $updatedAddress->postal_code);
+    }
 }
