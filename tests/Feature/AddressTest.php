@@ -127,4 +127,60 @@ class AddressTest extends TestCase
             ]
         ]);
     }
+
+    public function testGetAddressSuccess()
+    {
+        $this->seed(["UserSeeder", "AddressSeeder"]);
+        $user = User::with('contacts')->where('username', 'andikaa')->first();
+        $contact = $user->contacts->first();
+        $address = $contact->addresses()->first();
+
+        $this->get('api/contacts/' . $contact->id . '/addresses/' . $address->id, [
+            "Authorization" => $user->token
+        ])->assertStatus(200)->assertJson([
+            "data" => [
+                "street" => $address->street,
+                "city" => "Karawang",
+                "province" => "Jawa Barat",
+                "country" => "Indonesia",
+                "postal_code" => "121212"
+            ]
+        ]);
+    }
+
+    public function testGetAddressDataForNonExistingContact()
+    {
+        $this->seed(["UserSeeder", "AddressSeeder"]);
+        $user = User::with('contacts')->where('username', 'andikaa')->first();
+        $contact = $user->contacts->first();
+        $address = $contact->addresses()->first();
+
+        $this->get('api/contacts/' . $contact->id + 1 . '/addresses/' . $address->id, [
+            "Authorization" => $user->token
+        ])->assertStatus(404)->assertJson([
+            "errors" => [
+                "message" => [
+                    "not found"
+                ]
+            ]
+        ]);
+    }
+
+    public function testGetAddressDataForNonExistingAddressId()
+    {
+        $this->seed(["UserSeeder", "AddressSeeder"]);
+        $user = User::with('contacts')->where('username', 'andikaa')->first();
+        $contact = $user->contacts->first();
+        $address = $contact->addresses()->first();
+
+        $this->get('api/contacts/' . $contact->id . '/addresses/' . $address->id + 3, [
+            "Authorization" => $user->token
+        ])->assertStatus(404)->assertJson([
+            "errors" => [
+                "message" => [
+                    "not found"
+                ]
+            ]
+        ]);
+    }
 }
