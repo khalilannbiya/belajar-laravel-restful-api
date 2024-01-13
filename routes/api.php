@@ -39,7 +39,7 @@ Route::prefix('contacts')->name('contacts.')->group(function () {
         Route::post('/{id}/addresses', [\App\Http\Controllers\AddressController::class, 'create'])->name("create.addresses")->where('id', '^[0-9]+$');
 
         Route::get('/{idContact}/addresses/{idAddress}', [\App\Http\Controllers\AddressController::class, 'get'])->name("get.addresses")->where(['idContact', 'idAddress'], '^[0-9]+$');
-
+        Route::delete('/{idContact}/addresses/{idAddress}', [\App\Http\Controllers\AddressController::class, 'delete'])->name("delete.addresses")->where(['idContact', 'idAddress'], '^[0-9]+$');
         Route::put('/{idContact}/addresses/{idAddress}', [\App\Http\Controllers\AddressController::class, 'update'])->name("update.addresses")->where(['idContact', 'idAddress'], '^[0-9]+$');
     });
 });

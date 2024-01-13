@@ -256,4 +256,23 @@ class AddressTest extends TestCase
         self::assertEquals($address->province, $updatedAddress->province);
         self::assertEquals($address->postal_code, $updatedAddress->postal_code);
     }
+
+    public function testDeleteAddressSuccess()
+    {
+        $this->seed(["UserSeeder", "AddressSeeder"]);
+        $user = User::with('contacts')->where('username', 'andikaa')->first();
+        $contact = $user->contacts->first();
+        $address = $contact->addresses()->first();
+
+        self::assertNotNull($address);
+
+        $this->delete('/api/contacts/' . $contact->id . '/addresses/' . $address->id, [], [
+            "Authorization" => $user->token
+        ])->assertStatus(200)->assertJson([
+            "data" => true
+        ]);
+
+        $deletedAddress = \App\Models\Address::find($address->id);
+        self::assertNull($deletedAddress);
+    }
 }
