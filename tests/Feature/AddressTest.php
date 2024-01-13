@@ -275,4 +275,32 @@ class AddressTest extends TestCase
         $deletedAddress = \App\Models\Address::find($address->id);
         self::assertNull($deletedAddress);
     }
+
+    public function testGetListAddresses()
+    {
+        $this->seed(["UserSeeder", "AddressSeeder"]);
+        $user = User::with('contacts')->where('username', 'andikaa')->first();
+        $contact = $user->contacts->first();
+
+        $this->get('/api/contacts/' . $contact->id . '/addresses', [
+            "Authorization" => $user->token
+        ])->assertStatus(200)->assertJson([
+            "data" => [
+                [
+                    "street" => "JL Mawar 1",
+                    "city" => "Karawang",
+                    "province" => "Jawa Barat",
+                    "country" => "Indonesia",
+                    "postal_code" => "121212"
+                ],
+                [
+                    "street" => "JL Mawar 2",
+                    "city" => "Karawang",
+                    "province" => "Jawa Barat",
+                    "country" => "Indonesia",
+                    "postal_code" => "121212"
+                ]
+            ]
+        ]);
+    }
 }

@@ -130,4 +130,24 @@ class AddressController extends Controller
             "data" => true
         ])->setStatusCode(200);
     }
+
+    public function getList(string $id)
+    {
+        $user = Auth::user();
+        $contact = Contact::with('addresses')->where('user_id', $user->id)->where('id', $id)->first();
+
+        if (!$contact) {
+            throw new HttpResponseException(response()->json([
+                "errors" => [
+                    "message" => [
+                        "not found"
+                    ]
+                ]
+            ])->setStatusCode(404));
+        }
+
+        $addresses = $contact->addresses;
+
+        return AddressResource::collection($addresses);
+    }
 }
