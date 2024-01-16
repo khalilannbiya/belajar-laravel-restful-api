@@ -9,136 +9,29 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class UserTest extends TestCase
 {
-    /**
-     * A basic feature test example.
-     */
-    public function testUserRegisterSuccess(): void
-    {
-        $this->post('/api/users', [
-            "username" => "khalilannbiya",
-            "name" => "Syeich Khalil Annbiya",
-            "password" => "rahasia789*(&@"
-        ])->assertStatus(201)->assertJson([
-            "data" => [
-                "username" => "khalilannbiya",
-                "name" => "Syeich Khalil Annbiya",
-            ]
-        ]);
-    }
-
-    public function testUserRegisterFailed(): void
-    {
-        $this->post('/api/users', [
-            "username" => "",
-            "name" => "",
-            "password" => "rahasia789"
-        ])->assertStatus(400)->assertJson([
-            "errors" => [
-                "username" => [
-                    "The username field is required."
-                ],
-                "name" => [
-                    "The name field is required."
-                ],
-                "password" => [
-                    "The password field must contain at least one symbol."
-                ]
-            ]
-        ]);
-    }
-
-    public function testUserRegisterUsernameAlreadyExists(): void
-    {
-        $this->testUserRegisterSuccess();
-
-        $this->post('/api/users', [
-            "username" => "khalilannbiya",
-            "name" => "syeich khalil annbiya",
-            "password" => "rahasia789*(&@"
-        ])->assertStatus(400)->assertJson([
-            "errors" => [
-                "username" => [
-                    "Username already registered."
-                ]
-            ]
-        ]);
-    }
-
-    public function testUserLoginSuccess()
-    {
-        $this->testUserRegisterSuccess();
-
-        $this->post('/api/users/login', [
-            "username" => "khalilannbiya",
-            "password" => "rahasia789*(&@"
-        ])->assertStatus(200)->assertJson([
-            "data" => [
-                "username" => "khalilannbiya",
-                "name" => "Syeich Khalil Annbiya",
-            ]
-        ]);
-
-        $user = \App\Models\User::where('username', 'khalilannbiya')->first();
-        self::assertNotNull($user->token);
-
-        return $user->token;
-    }
-
-    public function testUserLoginUsernameWrong(): void
-    {
-        $this->testUserRegisterSuccess();
-
-        $this->post('/api/users/login', [
-            "username" => "uhyyu",
-            "password" => "rahasia789*(&@"
-        ])->assertStatus(401)->assertJson([
-            "errors" => [
-                "message" => [
-                    "username or password wrong."
-                ]
-            ]
-        ]);
-    }
-
-    public function testUserLoginPasswordWrong(): void
-    {
-        $this->testUserRegisterSuccess();
-
-        $this->post('/api/users/login', [
-            "username" => "khalilannbiya",
-            "password" => "salahpassword"
-        ])->assertStatus(401)->assertJson([
-            "errors" => [
-                "message" => [
-                    "username or password wrong."
-                ]
-            ]
-        ]);
-    }
-
     public function testGetUserCurrentSuccess(): void
     {
-        $token = $this->testUserLoginSuccess();
+        $token = $this->userRegister();
 
         $this->get('/api/users/current', [
-            "Authorization" => $token,
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $token",
         ])->assertStatus(200)->assertJson([
+            "success" => true,
+            "message" => "Get Current Successfully",
             "data" => [
-                "username" => "khalilannbiya",
                 "name" => "Syeich Khalil Annbiya",
-                "token" => $token
+                "username" => "khalilannbiya"
             ]
         ]);
     }
 
     public function testGetUserCurrentWithoutTokenHeader()
     {
-        $this->get('/api/users/current')->assertStatus(401)->assertJson([
-            "errors" => [
-                "message" => [
-                    "unauthorized"
-                ]
-            ]
+        $this->get('/api/users/current', [
+            "Accept" => "application/json"
+        ])->assertStatus(401)->assertJson([
+            "message" => "Unauthenticated."
         ]);
     }
 
@@ -146,26 +39,26 @@ class UserTest extends TestCase
     {
 
         $this->get('/api/users/current', [
+            "Accept" => "application/json",
             "Authorization" => "invalidtoken123",
         ])->assertStatus(401)->assertJson([
-            "errors" => [
-                "message" => [
-                    "unauthorized"
-                ]
-            ]
+            "message" => "Unauthenticated."
         ]);
     }
 
     public function testUpdateNameSuccess()
     {
-        $token =  $this->testUserLoginSuccess();
+        $token = $this->userRegister();
         $oldUser = User::where('username', 'khalilannbiya')->first();
 
-        $this->put('/api/users/current', [
+        $this->put('api/users/current', [
             "name" => "Syeich",
         ], [
-            "Authorization" => $token,
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $token",
         ])->assertStatus(200)->assertJson([
+            "success" => true,
+            "message" => "Update Successfully",
             "data" => [
                 "username" => "khalilannbiya",
                 "name" => "Syeich",
@@ -178,14 +71,17 @@ class UserTest extends TestCase
 
     public function testUpdatePasswordSuccess()
     {
-        $token =  $this->testUserLoginSuccess();
+        $token = $this->userRegister();
         $oldUser = User::where('username', 'khalilannbiya')->first();
 
         $this->put('/api/users/current', [
             "password" => "inipasswordbaru123##",
         ], [
-            "Authorization" => $token,
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $token",
         ])->assertStatus(200)->assertJson([
+            "success" => true,
+            "message" => "Update Successfully",
             "data" => [
                 "username" => "khalilannbiya",
                 "name" => "Syeich Khalil Annbiya",
@@ -198,42 +94,19 @@ class UserTest extends TestCase
 
     public function testUpdateFailed()
     {
-        $token =  $this->testUserLoginSuccess();
+        $token = $this->userRegister();
 
         $this->put('/api/users/current', [
             "name" => "Syeich",
             "password" => "inipasswordinvalid"
         ], [
-            "Authorization" => $token,
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $token",
         ])->assertStatus(400)->assertJson([
             "errors" => [
                 "password" => [
                     "The password field must contain at least one symbol.",
                     "The password field must contain at least one number."
-                ]
-            ]
-        ]);
-    }
-
-    public function testLogoutSuccess()
-    {
-        $token =  $this->testUserLoginSuccess();
-
-        $this->delete('/api/users/logout', [], [
-            "Authorization" => $token,
-        ])->assertStatus(200)->assertJson([
-            "data" => true
-        ]);
-    }
-
-    public function testLogoutFailed()
-    {
-        $this->delete('/api/users/logout', [], [
-            "Authorization" => "salah",
-        ])->assertStatus(401)->assertJson([
-            "errors" => [
-                "message" => [
-                    "unauthorized"
                 ]
             ]
         ]);

@@ -6,9 +6,12 @@ use App\Models\Contact;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+// Sanctum
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Model implements Authenticatable
 {
+    use HasApiTokens;
     /**
      * The attributes that are mass assignable.
      *

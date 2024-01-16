@@ -14,7 +14,7 @@ class AddressSeeder extends Seeder
      */
     public function run(): void
     {
-        $user1 = \App\Models\User::where('username', 'andikaa')->first();
+        $user1 = \App\Models\User::where('username', 'khalilannbiya')->first();
 
         for ($i = 1; $i <= 5; $i++) {
             $contact = new Contact();

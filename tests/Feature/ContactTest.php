@@ -14,7 +14,7 @@ class ContactTest extends TestCase
      */
     public function testCreateContactSuccess()
     {
-        $this->seed("UserSeeder");
+        $token =  $this->userRegister();
 
         $this->post('/api/contacts', [
             "first_name" => "Indra",
@@ -22,8 +22,11 @@ class ContactTest extends TestCase
             "email" => "indrafri@gmail.com",
             "phone" => "089329982982"
         ], [
-            "Authorization" => "testingtoken",
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $token",
         ])->assertStatus(201)->assertJson([
+            "success" => true,
+            "message" => "Add Contact Successfully",
             "data" => [
                 "first_name" => "Indra",
                 "last_name" => "Frimawan",
@@ -35,7 +38,7 @@ class ContactTest extends TestCase
 
     public function testCreateContactFailed()
     {
-        $this->seed("UserSeeder");
+        $token =  $this->userRegister();
 
         $this->post('/api/contacts', [
             "first_name" => "",
@@ -43,7 +46,8 @@ class ContactTest extends TestCase
             "email" => "indrafri",
             "phone" => "089329982982"
         ], [
-            "Authorization" => "testingtoken",
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $token",
         ])->assertStatus(400)->assertJson([
             "errors" => [
                 "first_name" => [
@@ -58,36 +62,35 @@ class ContactTest extends TestCase
 
     public function testCreateContactUnauthorized()
     {
-        $this->seed("UserSeeder");
-
         $this->post('/api/contacts', [
             "first_name" => "Indra",
             "last_name" => "Frimawan",
             "email" => "indrafri@gmail.com",
             "phone" => "089329982982"
         ], [
+            "Accept" => "application/json",
             "Authorization" => "tokensalah",
         ])->assertStatus(401)->assertJson([
-            "errors" => [
-                "message" => [
-                    "unauthorized"
-                ]
-            ]
+            "message" => "Unauthenticated."
         ]);
     }
 
     public function testGetContactSuccess()
     {
-        $this->seed(["UserSeeder", "ContactSeeder"]);
+        $tokens = $this->userRegisterMany();
+        $this->seed("ContactSeeder");
         $contact = Contact::query()->limit(1)->first();
 
         $this->get('/api/contacts/' . $contact->id, [
-            'Authorization' => 'testingtoken'
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $tokens[0]",
         ])->assertStatus(200)
             ->assertJson([
-                'data' => [
-                    "first_name" => "andikaa test first 1",
-                    "last_name" => "andikaa test last 1",
+                "success" => true,
+                "message" => "Get Contact Successfully",
+                "data" => [
+                    "first_name" => "khalilannbiya test first 1",
+                    "last_name" => "khalilannbiya test last 1",
                     "email" => "test1@gmail.com",
                     "phone" => "1111111"
                 ]
@@ -96,11 +99,13 @@ class ContactTest extends TestCase
 
     public function testGetNotFound()
     {
-        $this->seed(["UserSeeder", "ContactSeeder"]);
+        $tokens = $this->userRegisterMany();
+        $this->seed("ContactSeeder");
         $contact = Contact::query()->limit(1)->first();
 
         $this->get('/api/contacts/' . $contact->id + 10, [
-            'Authorization' => 'testingtoken'
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $tokens[0]",
         ])->assertStatus(404)
             ->assertJson([
                 'errors' => [
@@ -113,11 +118,13 @@ class ContactTest extends TestCase
 
     public function testGetOtherUserContact()
     {
-        $this->seed(["UserSeeder", "ContactSeeder"]);
+        $tokens = $this->userRegisterMany();
+        $this->seed("ContactSeeder");
         $contact = Contact::query()->limit(1)->first();
 
         $this->get('/api/contacts/' . $contact->id, [
-            'Authorization' => 'testingtoken2'
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $tokens[1]",
         ])->assertStatus(404)
             ->assertJson([
                 'errors' => [
@@ -130,7 +137,8 @@ class ContactTest extends TestCase
 
     public function testUpdateContactSuccess()
     {
-        $this->seed(["UserSeeder", "ContactSeeder"]);
+        $tokens = $this->userRegisterMany();
+        $this->seed("ContactSeeder");
         $contact = Contact::query()->limit(1)->first();
 
         $this->put('/api/contacts/' . $contact->id, [
@@ -139,8 +147,11 @@ class ContactTest extends TestCase
             'email' => 'testubah@gmail.com',
             'phone' => '1111112',
         ], [
-            'Authorization' => 'testingtoken'
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $tokens[0]"
         ])->assertStatus(200)->assertJson([
+            "success" => true,
+            "message" => "Update Contact Successfully",
             "data" => [
                 "first_name" => "testubah",
                 "last_name" => "testubah",
@@ -158,17 +169,21 @@ class ContactTest extends TestCase
 
     public function testUpdateContactFirstNameOnly()
     {
-        $this->seed(["UserSeeder", "ContactSeeder"]);
+        $tokens = $this->userRegisterMany();
+        $this->seed("ContactSeeder");
         $contact = Contact::query()->limit(1)->first();
 
         $this->put('/api/contacts/' . $contact->id, [
             'first_name' => 'testubah',
         ], [
-            'Authorization' => 'testingtoken'
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $tokens[0]"
         ])->assertStatus(200)->assertJson([
+            "success" => true,
+            "message" => "Update Contact Successfully",
             "data" => [
                 "first_name" => "testubah",
-                "last_name" => "andikaa test last 1",
+                "last_name" => "khalilannbiya test last 1",
                 "email" => "test1@gmail.com",
                 "phone" => "1111111"
             ]
@@ -183,7 +198,8 @@ class ContactTest extends TestCase
 
     public function testUpdateOtherUserContact()
     {
-        $this->seed(["UserSeeder", "ContactSeeder"]);
+        $tokens = $this->userRegisterMany();
+        $this->seed("ContactSeeder");
         $contact = Contact::query()->limit(1)->first();
 
         $this->put('/api/contacts/' . $contact->id, [
@@ -192,7 +208,8 @@ class ContactTest extends TestCase
             'email' => 'testubah@gmail.com',
             'phone' => '1111112',
         ], [
-            'Authorization' => 'testingtoken2'
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $tokens[1]"
         ])->assertStatus(404)
             ->assertJson([
                 'errors' => [
@@ -205,7 +222,8 @@ class ContactTest extends TestCase
 
     public function testUpdateContactNotFound()
     {
-        $this->seed(["UserSeeder", "ContactSeeder"]);
+        $tokens = $this->userRegisterMany();
+        $this->seed("ContactSeeder");
         $contact = Contact::query()->limit(1)->first();
 
         $this->put('/api/contacts/' . $contact->id + 10, [
@@ -214,7 +232,8 @@ class ContactTest extends TestCase
             'email' => 'testubah@gmail.com',
             'phone' => '1111112',
         ], [
-            'Authorization' => 'testingtoken'
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $tokens[0]"
         ])->assertStatus(404)->assertJson([
             "errors" => [
                 "message" => [
@@ -226,13 +245,16 @@ class ContactTest extends TestCase
 
     public function testDeleteContactSuccess()
     {
-        $this->seed(["UserSeeder", "ContactSeeder"]);
+        $tokens = $this->userRegisterMany();
+        $this->seed("ContactSeeder");
         $contact = Contact::query()->limit(1)->first();
 
         $this->delete('/api/contacts/' . $contact->id, [], [
-            'Authorization' => 'testingtoken'
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $tokens[0]"
         ])->assertStatus(200)->assertJson([
-            "data" => true
+            "success" => true,
+            "message" => "Delete Contact Successfully",
         ]);
 
         $contactDeleted = Contact::where('id', $contact->id)->first();
@@ -241,11 +263,13 @@ class ContactTest extends TestCase
 
     public function testDeleteContactNotFound()
     {
-        $this->seed(["UserSeeder", "ContactSeeder"]);
+        $tokens = $this->userRegisterMany();
+        $this->seed("ContactSeeder");
         $contact = Contact::query()->limit(1)->first();
 
         $this->delete('/api/contacts/' . $contact->id + 10, [], [
-            'Authorization' => 'testingtoken'
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $tokens[0]"
         ])->assertStatus(404)->assertJson([
             "errors" => [
                 "message" => [
@@ -257,10 +281,12 @@ class ContactTest extends TestCase
 
     public function testSearchByEmail()
     {
-        $this->seed(["UserSeeder", "ContactSeeder"]);
+        $tokens = $this->userRegisterMany();
+        $this->seed("ContactSeeder");
 
         $this->get('/api/contacts?email=test', [
-            'Authorization' => 'testingtoken'
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $tokens[0]"
         ])->assertStatus(200)->assertJson([
             "data" => [],
             "links" => [],

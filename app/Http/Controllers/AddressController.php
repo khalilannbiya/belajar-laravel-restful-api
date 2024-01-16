@@ -34,7 +34,11 @@ class AddressController extends Controller
         $address->contact_id = $contactsForCurrentUser->id;
         $address->save();
 
-        return new AddressResource($address);
+        return response()->json([
+            "success" => true,
+            "message" => "Add Address Successfully",
+            "data" => new AddressResource($address),
+        ])->setStatusCode(201);
     }
 
     public function get(string $idContact, string $idAddress)
@@ -62,7 +66,11 @@ class AddressController extends Controller
                 ]
             ])->setStatusCode(404));
         }
-        return new AddressResource($address);
+        return response()->json([
+            "success" => true,
+            "message" => "Get Address Successfully",
+            "data" => new AddressResource($address),
+        ]);
     }
 
     public function update(AddressUpdateRequest $request, string $idContact, string $idAddress)
@@ -95,7 +103,11 @@ class AddressController extends Controller
         $address->fill($data);
         $address->save();
 
-        return new AddressResource($address);
+        return response()->json([
+            "success" => true,
+            "message" => "Update Address Successfully",
+            "data" => new AddressResource($address),
+        ]);
     }
 
     public function delete(string $idContact, string $idAddress)
@@ -127,8 +139,9 @@ class AddressController extends Controller
         $address->delete();
 
         return response()->json([
-            "data" => true
-        ])->setStatusCode(200);
+            "success" => true,
+            "message" => "Delete Address Successfully",
+        ]);
     }
 
     public function getList(string $id)
