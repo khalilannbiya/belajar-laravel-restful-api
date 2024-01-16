@@ -11,8 +11,9 @@ class AddressTest extends TestCase
 {
     public function testCreateAddressSuccess()
     {
-        $this->seed(["UserSeeder", "ContactSeeder"]);
-        $user = User::with('contacts')->where('username', 'andikaa')->first();
+        $tokens = $this->userRegisterMany();
+        $this->seed("ContactSeeder");
+        $user = User::with('contacts')->where('username', 'khalilannbiya')->first();
         $contact = $user->contacts->first();
 
         $this->post('/api/contacts/' . $contact->id . '/addresses', [
@@ -22,8 +23,11 @@ class AddressTest extends TestCase
             "country" => "Indoenesia",
             "postal_code" => "12121"
         ], [
-            "Authorization" => 'testingtoken'
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $tokens[0]",
         ])->assertStatus(201)->assertJson([
+            "success" => true,
+            "message" => "Add Address Successfully",
             "data" => [
                 "street" => "JL Melati Uhuy",
                 "city" => "Karawang",
@@ -39,11 +43,10 @@ class AddressTest extends TestCase
 
     public function testUser1CannotAddAddressToContactsOwnedByUser2()
     {
-        $this->seed(["UserSeeder", "ContactSeeder"]);
-        $user1 = User::with('contacts')->where('username', 'andikaa')->first();
-        $tokenUser1 = $user1->token;
+        $tokens = $this->userRegisterMany();
+        $this->seed("ContactSeeder");
 
-        $user2 = User::with('contacts')->where('username', 'prakasaaa')->first();
+        $user2 = User::with('contacts')->where('username', 'andikaa')->first();
         $contactUser2 = $user2->contacts->first();
 
         $this->post('/api/contacts/' . $contactUser2->id . '/addresses', [
@@ -53,7 +56,8 @@ class AddressTest extends TestCase
             "country" => "Indoenesia",
             "postal_code" => "12121"
         ], [
-            "Authorization" => $tokenUser1 // Log in as user 1
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $tokens[0]" // Log in as user 1
         ])->assertStatus(404)->assertJson([
             "errors" => [
                 "message" => [
@@ -65,7 +69,8 @@ class AddressTest extends TestCase
 
     public function testUserCannotAddAddressWithInvalidContactId()
     {
-        $this->seed(["UserSeeder", "ContactSeeder"]);
+        $tokens = $this->userRegisterMany();
+        $this->seed("ContactSeeder");
         $user = User::with('contacts')->where('username', 'andikaa')->first();
 
 
@@ -76,7 +81,8 @@ class AddressTest extends TestCase
             "country" => "Indoenesia",
             "postal_code" => "12121"
         ], [
-            "Authorization" => $user->token
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $tokens[0]"
         ])->assertStatus(404)->assertJson([
             "errors" => [
                 "message" => [
@@ -95,20 +101,18 @@ class AddressTest extends TestCase
             "country" => "Indoenesia",
             "postal_code" => "12121"
         ], [
-            "Authorization" => "salahtoken" //invalid token
+            "Accept" => "application/json",
+            "Authorization" => "Bearer salahtoken" //invalid token
         ])->assertStatus(401)->assertJson([
-            "errors" => [
-                "message" => [
-                    "unauthorized"
-                ]
-            ]
+            "message" => "Unauthenticated."
         ]);
     }
 
     public function testFailsToSubmitFormWithRequiredFieldsNotFilled()
     {
-        $this->seed(["UserSeeder", "ContactSeeder"]);
-        $user = User::with('contacts')->where('username', 'andikaa')->first();
+        $tokens = $this->userRegisterMany();
+        $this->seed("ContactSeeder");
+        $user = User::with('contacts')->where('username', 'khalilannbiya')->first();
 
 
         $this->post('/api/contacts/' . $user->id . '/addresses', [
@@ -118,7 +122,8 @@ class AddressTest extends TestCase
             "country" => "", // required
             "postal_code" => "12121"
         ], [
-            "Authorization" => $user->token
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $tokens[0]"
         ])->assertStatus(400)->assertJson([
             "errors" => [
                 "country" => [
@@ -130,14 +135,18 @@ class AddressTest extends TestCase
 
     public function testGetAddressSuccess()
     {
-        $this->seed(["UserSeeder", "AddressSeeder"]);
-        $user = User::with('contacts')->where('username', 'andikaa')->first();
+        $tokens = $this->userRegisterMany();
+        $this->seed("AddressSeeder");
+        $user = User::with('contacts')->where('username', 'khalilannbiya')->first();
         $contact = $user->contacts->first();
         $address = $contact->addresses()->first();
 
         $this->get('api/contacts/' . $contact->id . '/addresses/' . $address->id, [
-            "Authorization" => $user->token
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $tokens[0]"
         ])->assertStatus(200)->assertJson([
+            "success" => true,
+            "message" => "Get Address Successfully",
             "data" => [
                 "street" => $address->street,
                 "city" => "Karawang",
@@ -150,13 +159,15 @@ class AddressTest extends TestCase
 
     public function testGetAddressDataForNonExistingContact()
     {
-        $this->seed(["UserSeeder", "AddressSeeder"]);
-        $user = User::with('contacts')->where('username', 'andikaa')->first();
+        $tokens = $this->userRegisterMany();
+        $this->seed("AddressSeeder");
+        $user = User::with('contacts')->where('username', 'khalilannbiya')->first();
         $contact = $user->contacts->first();
         $address = $contact->addresses()->first();
 
         $this->get('api/contacts/' . $contact->id + 1 . '/addresses/' . $address->id, [
-            "Authorization" => $user->token
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $tokens[0]"
         ])->assertStatus(404)->assertJson([
             "errors" => [
                 "message" => [
@@ -168,13 +179,15 @@ class AddressTest extends TestCase
 
     public function testGetAddressDataForNonExistingAddressId()
     {
-        $this->seed(["UserSeeder", "AddressSeeder"]);
-        $user = User::with('contacts')->where('username', 'andikaa')->first();
+        $tokens = $this->userRegisterMany();
+        $this->seed("AddressSeeder");
+        $user = User::with('contacts')->where('username', 'khalilannbiya')->first();
         $contact = $user->contacts->first();
         $address = $contact->addresses()->first();
 
         $this->get('api/contacts/' . $contact->id . '/addresses/' . $address->id + 3, [
-            "Authorization" => $user->token
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $tokens[0]"
         ])->assertStatus(404)->assertJson([
             "errors" => [
                 "message" => [
@@ -186,8 +199,9 @@ class AddressTest extends TestCase
 
     public function testUpdateAddressSuccess()
     {
-        $this->seed(["UserSeeder", "AddressSeeder"]);
-        $user = User::with('contacts')->where('username', 'andikaa')->first();
+        $tokens = $this->userRegisterMany();
+        $this->seed("AddressSeeder");
+        $user = User::with('contacts')->where('username', 'khalilannbiya')->first();
         $contact = $user->contacts->first();
         $address = $contact->addresses()->first();
 
@@ -204,8 +218,11 @@ class AddressTest extends TestCase
             "country" => "Indonesia",
             "postal_code" => "90900"
         ], [
-            "Authorization" => $user->token
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $tokens[0]"
         ])->assertStatus(200)->assertJson([
+            "success" => true,
+            "message" => "Update Address Successfully",
             "data" => [
                 "street" => "Jl Rambutan",
                 "city" => "Jakarta",
@@ -224,8 +241,9 @@ class AddressTest extends TestCase
 
     public function testUpdateAddressFailsWithoutRequiredFields()
     {
-        $this->seed(["UserSeeder", "AddressSeeder"]);
-        $user = User::with('contacts')->where('username', 'andikaa')->first();
+        $tokens = $this->userRegisterMany();
+        $this->seed("AddressSeeder");
+        $user = User::with('contacts')->where('username', 'khalilannbiya')->first();
         $contact = $user->contacts->first();
         $address = $contact->addresses()->first();
 
@@ -241,7 +259,8 @@ class AddressTest extends TestCase
             "province" => "DKI Jakarta",
             "postal_code" => "90900"
         ], [
-            "Authorization" => $user->token
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $tokens[0]"
         ])->assertStatus(400)->assertJson([
             "errors" => [
                 "country" => [
@@ -259,17 +278,20 @@ class AddressTest extends TestCase
 
     public function testDeleteAddressSuccess()
     {
-        $this->seed(["UserSeeder", "AddressSeeder"]);
-        $user = User::with('contacts')->where('username', 'andikaa')->first();
+        $tokens = $this->userRegisterMany();
+        $this->seed("AddressSeeder");
+        $user = User::with('contacts')->where('username', 'khalilannbiya')->first();
         $contact = $user->contacts->first();
         $address = $contact->addresses()->first();
 
         self::assertNotNull($address);
 
         $this->delete('/api/contacts/' . $contact->id . '/addresses/' . $address->id, [], [
-            "Authorization" => $user->token
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $tokens[0]"
         ])->assertStatus(200)->assertJson([
-            "data" => true
+            "success" => true,
+            "message" => "Delete Address Successfully",
         ]);
 
         $deletedAddress = \App\Models\Address::find($address->id);
@@ -278,12 +300,14 @@ class AddressTest extends TestCase
 
     public function testGetListAddresses()
     {
-        $this->seed(["UserSeeder", "AddressSeeder"]);
-        $user = User::with('contacts')->where('username', 'andikaa')->first();
+        $tokens = $this->userRegisterMany();
+        $this->seed("AddressSeeder");
+        $user = User::with('contacts')->where('username', 'khalilannbiya')->first();
         $contact = $user->contacts->first();
 
         $this->get('/api/contacts/' . $contact->id . '/addresses', [
-            "Authorization" => $user->token
+            "Accept" => "application/json",
+            "Authorization" => "Bearer $tokens[0]"
         ])->assertStatus(200)->assertJson([
             "data" => [
                 [

@@ -23,7 +23,11 @@ class ContactController extends Controller
         $contact->user_id = $user->id;
         $contact->save();
 
-        return (new ContactResource($contact))->response()->setStatusCode(201);
+        return response()->json([
+            "success" => true,
+            "message" => "Add Contact Successfully",
+            "data" => new ContactResource($contact),
+        ])->setStatusCode(201);
     }
 
     public function get(string $id)
@@ -39,7 +43,11 @@ class ContactController extends Controller
                 ]
             ])->setStatusCode(404));
         }
-        return new ContactResource($contact);
+        return response()->json([
+            "success" => true,
+            "message" => "Get Contact Successfully",
+            "data" => new ContactResource($contact),
+        ]);
     }
 
     public function update(ContactUpdateRequest $request, string $id)
@@ -58,7 +66,11 @@ class ContactController extends Controller
         }
         $contact->update($data);
 
-        return new ContactResource($contact);
+        return response()->json([
+            "success" => true,
+            "message" => "Update Contact Successfully",
+            "data" => new ContactResource($contact),
+        ]);
     }
 
     public function delete(string $id)
@@ -77,7 +89,8 @@ class ContactController extends Controller
         $contact->delete();
 
         return response()->json([
-            "data" => true
+            "success" => true,
+            "message" => "Delete Contact Successfully",
         ]);
     }
 

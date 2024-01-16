@@ -12,12 +12,12 @@ class ContactSeeder extends Seeder
      */
     public function run(): void
     {
-        $user1 = \App\Models\User::where('username', 'andikaa')->first();
-        $user2 = \App\Models\User::where('username', 'prakasaaa')->first();
+        $user1 = \App\Models\User::where('username', 'khalilannbiya')->first();
+        $user2 = \App\Models\User::where('username', 'andikaa')->first();
 
-        $andikaContacts = [];
+        $khalilannbiyaContacts = [];
         for ($i = 1; $i <= 10; $i++) {
-            $andikaContacts[] = [
+            $khalilannbiyaContacts[] = [
                 'first_name' => "$user1->username test first $i",
                 'last_name' => "$user1->username test last $i",
                 'email' => "test$i@gmail.com",
@@ -26,9 +26,9 @@ class ContactSeeder extends Seeder
             ];
         }
 
-        $prakasaContacts = [];
+        $andikaaContacts = [];
         for ($i = 1; $i <= 10; $i++) {
-            $prakasaContacts[] = [
+            $andikaaContacts[] = [
                 'first_name' => "$user2->username test first $i",
                 'last_name' => "$user2->username test last $i",
                 'email' => "test$i@gmail.com",
@@ -37,7 +37,7 @@ class ContactSeeder extends Seeder
             ];
         }
 
-        \App\Models\Contact::insert($andikaContacts);
-        \App\Models\Contact::insert($prakasaContacts);
+        \App\Models\Contact::insert($khalilannbiyaContacts);
+        \App\Models\Contact::insert($andikaaContacts);
     }
 }
